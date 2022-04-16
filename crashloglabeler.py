@@ -96,7 +96,7 @@ class CrashLogLabeler(IPlugin):
             self.organizer.pluginSetting(self.name(), "database_file")
         )
 
-    def onUserInterfaceInitializedCallback(self, main_window : QMainWindow):
+    def onUserInterfaceInitializedCallback(self, main_window : "QMainWindow"):
         self.processor.update_database()
 
         for log in get_crash_logs():
