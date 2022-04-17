@@ -66,16 +66,19 @@ class CrashLogViewer(IPluginTool):
         dialog = QDialog()
         dialog.setWindowTitle("Crash Log Viewer")
 
-        list = FileView(dialog)
+        list = QListView(dialog)
         list.setModel(proxy_model)
         list.setRootIndex(proxy_model.mapFromSource(source_model.index(log_dir)))
         list.setMinimumWidth(list.sizeHintForColumn(0))
         list.setDragEnabled(True)
+        list.activated.connect(lambda index :
+            os.startfile(source_model.filePath(proxy_model.mapToSource(index))))
 
         button_box = QDialogButtonBox(dialog)
         button_box.setOrientation(Qt.Horizontal)
         button_box.setStandardButtons(QDialogButtonBox.Close)
-        #button_box.rejected.connect(dialog.reject)
+        button_box.rejected.connect(dialog.reject)
+        button_box.button(QDialogButtonBox.Close).setAutoDefault(False)
 
         layout = QVBoxLayout()
         layout.addWidget(list)
@@ -83,21 +86,6 @@ class CrashLogViewer(IPluginTool):
         dialog.setLayout(layout)
 
         return dialog
-
-class FileView(QListView):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def edit(
-        self,
-        index : "QModelIndex",
-        trigger : "EditTrigger",
-        event : "QEvent"
-    ) -> bool:
-        if trigger in (QAbstractItemView.DoubleClicked, QAbstractItemView.EditKeyPressed):
-            os.startfile(self.model().filePath(index))
-        return False
 
 class FileFilterProxyModel(QSortFilterProxyModel):
 
