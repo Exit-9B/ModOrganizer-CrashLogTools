@@ -1,13 +1,5 @@
-from typing import (Any, Dict, List, Union)
-from mobase import (
-    IOrganizer,
-    IPlugin,
-    IPluginRequirement,
-    PluginRequirementFactory,
-    PluginSetting,
-    ReleaseType,
-    VersionInfo,
-)
+from typing import *
+from mobase import *
 from PyQt5.QtWidgets import QMainWindow
 
 from .crashlogutil import CrashLogProcessor
@@ -17,29 +9,17 @@ class CrashLogLabeler(IPlugin):
     def __init__(self):
         super().__init__()
 
-    def author(self) -> str:
-        return "Parapets"
+    def name(self) -> str:
+        return "Crash Log Labeler"
+
+    def version(self) -> "VersionInfo":
+        return VersionInfo(1, 0, 0, 0, ReleaseType.BETA)
 
     def description(self) -> str:
         return "Labels known addresses in Skyrim crash logs"
 
-    def init(self, organizer: "IOrganizer") -> bool:
-        self.organizer = organizer
-        organizer.onAboutToRun(self.onAboutToRunCallback)
-        organizer.onFinishedRun(self.onFinishedRunCallback)
-        organizer.onPluginSettingChanged(self.onPluginSettingChangedCallback)
-        organizer.onUserInterfaceInitialized(self.onUserInterfaceInitializedCallback)
-
-        self.processor = CrashLogProcessor(
-            self.organizer.pluginSetting(self.name(), "git_repository"),
-            self.organizer.pluginSetting(self.name(), "git_branch"),
-            self.organizer.pluginSetting(self.name(), "database_file")
-        )
-
-        return True
-
-    def name(self) -> str:
-        return "Crash Log Labeler"
+    def author(self) -> str:
+        return "Parapets"
 
     def requirements(self) -> List["IPluginRequirement"]:
         return [
@@ -67,15 +47,26 @@ class CrashLogLabeler(IPlugin):
             )
         ]
 
-    def version(self) -> "VersionInfo":
-        return VersionInfo(1, 0, 0, 0, ReleaseType.BETA)
+    def init(self, organizer : "IOrganizer") -> bool:
+        self.organizer = organizer
+        organizer.onAboutToRun(self.onAboutToRunCallback)
+        organizer.onFinishedRun(self.onFinishedRunCallback)
+        organizer.onPluginSettingChanged(self.onPluginSettingChangedCallback)
+        organizer.onUserInterfaceInitialized(self.onUserInterfaceInitializedCallback)
+
+        self.processor = CrashLogProcessor(
+            self.organizer.pluginSetting(self.name(), "git_repository"),
+            self.organizer.pluginSetting(self.name(), "git_branch"),
+            self.organizer.pluginSetting(self.name(), "database_file")
+        )
+
+        return True
 
     def get_crash_logs(self) -> List[str]:
         directory = self.organizer.managedGame().documentsDirectory()
-        if directory.cd("SKSE"):
-            directory.setNameFilters(["crash-*.log"])
-            return [file.absoluteFilePath() for file in directory.entryInfoList()]
-        return []
+        directory.cd("SKSE")
+        directory.setNameFilters(["crash-*.log"])
+        return [file.absoluteFilePath() for file in directory.entryInfoList()]
 
     def onAboutToRunCallback(self, path : str) -> bool:
         self.crash_logs = self.get_crash_logs()
