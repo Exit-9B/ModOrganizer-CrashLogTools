@@ -10,7 +10,7 @@ from mobase import (
 )
 from PyQt5.QtWidgets import QMainWindow
 
-from .crashlogutil import *
+from .crashlogutil import CrashLogProcessor
 
 class CrashLogLabeler(IPlugin):
 
@@ -70,15 +70,22 @@ class CrashLogLabeler(IPlugin):
     def version(self) -> "VersionInfo":
         return VersionInfo(1, 0, 0, 0, ReleaseType.BETA)
 
+    def get_crash_logs(self) -> List[str]:
+        directory = self.organizer.managedGame().documentsDirectory()
+        if directory.cd("SKSE"):
+            directory.setNameFilters(["crash-*.log"])
+            return [file.absoluteFilePath() for file in directory.entryInfoList()]
+        return []
+
     def onAboutToRunCallback(self, path : str) -> bool:
-        self.crash_logs = get_crash_logs()
+        self.crash_logs = self.get_crash_logs()
         return True
 
     def onFinishedRunCallback(self, path : str, exit_code : int):
         if exit_code == 0:
             return
 
-        for log in get_crash_logs():
+        for log in self.get_crash_logs():
             if log not in self.crash_logs:
                 self.processor.update_database()
                 self.processor.process_log(log)
@@ -99,5 +106,5 @@ class CrashLogLabeler(IPlugin):
     def onUserInterfaceInitializedCallback(self, main_window : "QMainWindow"):
         self.processor.update_database()
 
-        for log in get_crash_logs():
+        for log in self.get_crash_logs():
             self.processor.process_log(log)

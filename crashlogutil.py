@@ -1,4 +1,3 @@
-import glob
 import os
 import re
 from typing import (Callable, Dict, List)
@@ -6,16 +5,9 @@ from PyQt5.QtCore import QFile
 
 from dulwich import porcelain as git
 
-from .winutil import get_documents_path
-
 GIT_REPO = os.path.join(os.path.dirname(__file__), "AddressLibraryDatabase")
 STACK_PATTERN = re.compile(
     r"(\t\[ *\d+\] 0x[0-9A-F]+ .*\+[0-9A-F]+) -> (?P<id>\d+)\+0x[0-9A-F]+")
-
-def get_crash_logs() -> List[str]:
-    documents = get_documents_path()
-    log_directory = os.path.join(documents, "My Games/Skyrim Special Edition/SKSE")
-    return glob.glob(os.path.join(log_directory, "crash-*.log"))
 
 class CrashLogProcessor():
     def __init__(self, git_remote : str, git_branch : str, database : str):
