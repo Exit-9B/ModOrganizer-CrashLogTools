@@ -79,8 +79,12 @@ class CrashLogProcessor():
         return stack_frame.ljust(width) + name + "\n"
 
     def lookup_ids(self, id_list : List[int]) -> Dict[int, str]:
+        database = self.get_database_path()
+        if not os.path.exists(database):
+            return {}
+
         lookup = {}
-        with IdScanner(self.get_database_path()) as scanner:
+        with IdScanner(database) as scanner:
             for addr_id in id_list:
                 name = scanner.find(addr_id)
                 if name:
