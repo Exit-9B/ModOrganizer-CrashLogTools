@@ -21,12 +21,15 @@ Adds a GUI dialog that allows you to easily access your crash logs.
 The tool can be started from the Tool Plugins menu.
 
 ## Packaging from source
-External libraries need to be acquired and installed to the `lib` directory.
+External libraries need to be acquired and installed to the `lib` subdirectory
+of the plugin.
 ```
-pip -r plugin-requirements.txt -t lib
+git clone https://github.com/Exit-9B/ModOrganizer-CrashLogTools
+cd ModOrganizer-CrashLogTools
+pip install -r plugin-requirements.txt -t crashlogtools/lib
 ```
 
 ## Installation
 The scripts should be installed to a subdirectory in the Mod Organizer plugins
-folder. The folder hierarchy should be something like
-`<MO2 DIR>\plugins\crashlogtools`, with the Python scripts inside.
+folder. The resulting folder hierarchy should be
+`<MO2 DIR>\plugins\crashlogtools`
