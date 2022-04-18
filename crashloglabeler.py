@@ -1,8 +1,12 @@
 from typing import *
 from mobase import *
-from PyQt5.QtWidgets import QMainWindow
+if TYPE_CHECKING:
+    from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtCore import *
 
 from .crashlogutil import CrashLogProcessor
+from . import crashlogs
+from . import addresslib
 
 class CrashLogLabeler(IPlugin):
 
@@ -22,29 +26,17 @@ class CrashLogLabeler(IPlugin):
         return "Parapets"
 
     def requirements(self) -> List["IPluginRequirement"]:
+        games = set.intersection(
+            addresslib.supported_games(),
+            crashlogs.supported_games()
+        )
+
         return [
-            PluginRequirementFactory.gameDependency({
-                "Skyrim Special Edition",
-            })
+            PluginRequirementFactory.gameDependency(games)
         ]
 
     def settings(self) -> List["PluginSetting"]:
         return [
-            PluginSetting(
-                "git_repository",
-                "Git repository for the address library database",
-                "https://github.com/meh321/AddressLibraryDatabase"
-            ),
-            PluginSetting(
-                "git_branch",
-                "Git branch to check out",
-                "main"
-            ),
-            PluginSetting(
-                "database_file",
-                "Path to the database file",
-                "skyrimae.rename"
-            ),
             PluginSetting(
                 "offline_mode",
                 "Disable update from remote database",
@@ -55,27 +47,14 @@ class CrashLogLabeler(IPlugin):
     def init(self, organizer : "IOrganizer") -> bool:
         self.organizer = organizer
         organizer.onFinishedRun(self.onFinishedRunCallback)
-        organizer.onPluginSettingChanged(self.onPluginSettingChangedCallback)
         organizer.onUserInterfaceInitialized(self.onUserInterfaceInitializedCallback)
-
-        self.processor = CrashLogProcessor(
-            self.organizer.pluginSetting(self.name(), "git_repository"),
-            self.organizer.pluginSetting(self.name(), "git_branch"),
-            self.organizer.pluginSetting(self.name(), "database_file")
-        )
 
         self.processed_logs = set()
 
         return True
 
-    def get_crash_logs(self) -> Set[str]:
-        directory = self.organizer.managedGame().documentsDirectory()
-        directory.cd("SKSE")
-        directory.setNameFilters(["crash-*.log"])
-        return set((file.absoluteFilePath() for file in directory.entryInfoList()))
-
     def onFinishedRunCallback(self, path : str, exit_code : int):
-        new_logs = self.get_crash_logs().difference(self.processed_logs)
+        new_logs = self.finder.get_crash_logs().difference(self.processed_logs)
         if not new_logs:
             return
 
@@ -87,25 +66,15 @@ class CrashLogLabeler(IPlugin):
 
         self.processed_logs.update(new_logs)
 
-    def onPluginSettingChangedCallback(
-        self,
-        plugin_name : str,
-        setting_name : str,
-        old_value : Union[None, bool, int, str, List[Any], Dict[str, Any]],
-        new_value : Union[None, bool, int, str, List[Any], Dict[str, Any]]
-    ) -> None:
-        self.processor.update_settings(
-            self.organizer.pluginSetting(self.name(), "git_repository"),
-            self.organizer.pluginSetting(self.name(), "git_branch"),
-            self.organizer.pluginSetting(self.name(), "database_file"),
-            self.organizer.pluginSetting(self.name(), "offline_mode")
-        )
-
     def onUserInterfaceInitializedCallback(self, main_window : "QMainWindow"):
+        game = self.organizer.managedGame().gameName()
+        self.finder = crashlogs.get_finder(game)
+        self.processor = CrashLogProcessor(game, lambda file : QFile(file).moveToTrash())
+
         if not self.organizer.pluginSetting(self.name(), "offline_mode"):
             self.processor.update_database()
 
-        logs = self.get_crash_logs()
+        logs = self.finder.get_crash_logs()
         for log in logs:
             self.processor.process_log(log)
         self.processed_logs.update(logs)

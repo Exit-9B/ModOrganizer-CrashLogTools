@@ -5,6 +5,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from . import crashlogs
+
 class CrashLogViewer(IPluginTool):
 
     def __init__(self):
@@ -24,9 +26,7 @@ class CrashLogViewer(IPluginTool):
 
     def requirements(self) -> List["IPluginRequirement"]:
         return [
-            PluginRequirementFactory.gameDependency({
-                "Skyrim Special Edition",
-            })
+            PluginRequirementFactory.gameDependency(crashlogs.supported_games())
         ]
 
     def settings(self) -> List["PluginSetting"]:
@@ -44,24 +44,26 @@ class CrashLogViewer(IPluginTool):
     def init(self, organizer : "IOrganizer") -> bool:
         self.organizer = organizer
         organizer.onUserInterfaceInitialized(self.onUserInterfaceInitializedCallback)
+
         return True
 
     def display(self) -> None:
         self.dialog.show()
 
     def onUserInterfaceInitializedCallback(self, main_window : "QMainWindow"):
+        game = self.organizer.managedGame().gameName()
+        self.finder = crashlogs.get_finder(game)
         self.dialog = self.make_dialog(main_window)
 
     def make_dialog(self, main_window : "QMainWindow") -> "QDialog":
-        documents = self.organizer.managedGame().documentsDirectory()
-        log_dir = os.path.join(documents.absolutePath(), "SKSE")
+        log_dir = self.finder.log_directory
 
         source_model = QFileSystemModel()
         source_model.setRootPath(log_dir)
 
         proxy_model = FileFilterProxyModel()
         proxy_model.setSourceModel(source_model)
-        proxy_model.setFilterWildcard("crash-*.log")
+        proxy_model.setFilterWildcard(self.finder.filter)
         proxy_model.sort(0, Qt.DescendingOrder)
 
         dialog = QDialog(main_window)
