@@ -50,9 +50,9 @@ class CrashLogViewer(IPluginTool):
         self.dialog.show()
 
     def onUserInterfaceInitializedCallback(self, main_window : "QMainWindow"):
-        self.dialog = self.make_dialog()
+        self.dialog = self.make_dialog(main_window)
 
-    def make_dialog(self) -> "QDialog":
+    def make_dialog(self, main_window : "QMainWindow") -> "QDialog":
         documents = self.organizer.managedGame().documentsDirectory()
         log_dir = os.path.join(documents.absolutePath(), "SKSE")
 
@@ -64,7 +64,7 @@ class CrashLogViewer(IPluginTool):
         proxy_model.setFilterWildcard("crash-*.log")
         proxy_model.sort(0, Qt.DescendingOrder)
 
-        dialog = QDialog()
+        dialog = QDialog(main_window)
         dialog.setWindowTitle("Crash Log Viewer")
 
         list = QListView(dialog)
