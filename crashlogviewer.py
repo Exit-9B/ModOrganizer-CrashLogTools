@@ -70,10 +70,38 @@ class CrashLogViewer(IPluginTool):
         list = QListView(dialog)
         list.setModel(proxy_model)
         list.setRootIndex(proxy_model.mapFromSource(source_model.index(log_dir)))
-        list.setMinimumWidth(list.sizeHintForColumn(0))
         list.setDragEnabled(True)
-        list.activated.connect(lambda index :
-            os.startfile(source_model.filePath(proxy_model.mapToSource(index))))
+        list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
+        def open(index : "QModelIndex") -> None:
+            source_index = proxy_model.mapToSource(index)
+            os.startfile(source_model.filePath(source_index))
+
+        def delete(index : "QModelIndex") -> None:
+            source_index = proxy_model.mapToSource(index)
+            QFile(source_model.filePath(source_index)).moveToTrash()
+
+        def for_selected(
+            action : Callable[["QModelIndex"], None]
+        ) -> Callable[[bool], None]:
+            def fn(checked : bool):
+                for index in list.selectedIndexes():
+                    action(index)
+            return fn
+
+        open_action = QAction(list.tr("&Open"), list)
+        open_action.triggered.connect(for_selected(open))
+        f = open_action.font()
+        f.setBold(True)
+        open_action.setFont(f)
+        list.addAction(open_action)
+
+        delete_action = QAction(list.tr("&Delete"), list)
+        delete_action.triggered.connect(for_selected(delete))
+        list.addAction(delete_action)
+
+        list.setContextMenuPolicy(Qt.ActionsContextMenu)
+        list.activated.connect(open)
 
         button_box = QDialogButtonBox(dialog)
         button_box.setOrientation(Qt.Horizontal)
