@@ -15,12 +15,19 @@ class CrashLogProcessor():
         self.git_branch = bytes(git_branch, "utf-8")
         self.database = database
 
-    def update_settings(self, git_remote : str, git_branch : str, database : str):
+    def update_settings(
+        self,
+        git_remote : str,
+        git_branch : str,
+        database : str,
+        offline_mode : bool
+    ) -> None:
         self.git_remote = git_remote
         self.git_branch = git_branch
         self.database = database
 
-        self.update_database()
+        if not offline_mode:
+            self.update_database()
 
     def clone_database(self) -> None:
         if not os.path.exists(GIT_REPO):
