@@ -9,8 +9,8 @@ Attempts to label known functions in the call stack by looking them up from
 [Address Library Database](https://github.com/meh321/AddressLibraryDatabase).
 
 When you start Mod Organizer with the plugin installed, it will pull the
-database and try to update any crash logs already in your log directory. If
-your game crashes thereafter, it will scan for a new log file and try to update
+database and try to label any crash logs already in your log directory. If
+your game crashes thereafter, it will scan for a new log file and try to label
 it as well.
 
 If you wish to restore the original logs, they can be found in the Recycle Bin.

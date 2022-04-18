@@ -17,7 +17,7 @@ class CrashLogLabeler(IPlugin):
         return "Crash Log Labeler"
 
     def version(self) -> "VersionInfo":
-        return VersionInfo(1, 0, 0, 0, ReleaseType.BETA)
+        return VersionInfo(1, 0, 0, 0, ReleaseType.FINAL)
 
     def description(self) -> str:
         return "Labels known addresses in Skyrim crash logs"
