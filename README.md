@@ -11,9 +11,12 @@ Attempts to label known functions in the call stack by looking them up from
 When you start Mod Organizer with the plugin installed, it will pull the
 database and try to label any crash logs already in your log directory. If
 your game crashes thereafter, it will scan for a new log file and try to label
-it as well.
+it as well. If you wish to restore the original logs, they can be found in the
+Recycle Bin.
 
-If you wish to restore the original logs, they can be found in the Recycle Bin.
+#### Settings
+**offline_mode**
+Disables automatic updates from the remote database.
 
 ### Crash Log Viewer
 Adds a GUI dialog that allows you to easily access your crash logs.
