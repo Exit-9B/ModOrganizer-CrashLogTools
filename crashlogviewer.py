@@ -14,7 +14,7 @@ class CrashLogViewer(IPluginTool):
         return "Crash Log Viewer"
 
     def version(self) -> "VersionInfo":
-        return VersionInfo(0, 0, 0, 0, ReleaseType.ALPHA)
+        return VersionInfo(1, 0, 0, 0, ReleaseType.BETA)
 
     def description(self) -> str:
         return "Lists crash logs"
@@ -62,6 +62,7 @@ class CrashLogViewer(IPluginTool):
         proxy_model = FileFilterProxyModel()
         proxy_model.setSourceModel(source_model)
         proxy_model.setFilterWildcard("crash-*.log")
+        proxy_model.sort(0, Qt.DescendingOrder)
 
         dialog = QDialog()
         dialog.setWindowTitle("Crash Log Viewer")
