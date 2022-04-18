@@ -49,7 +49,6 @@ class CrashLogLabeler(IPlugin):
 
     def init(self, organizer : "IOrganizer") -> bool:
         self.organizer = organizer
-        organizer.onAboutToRun(self.onAboutToRunCallback)
         organizer.onFinishedRun(self.onFinishedRunCallback)
         organizer.onPluginSettingChanged(self.onPluginSettingChangedCallback)
         organizer.onUserInterfaceInitialized(self.onUserInterfaceInitializedCallback)
@@ -60,23 +59,22 @@ class CrashLogLabeler(IPlugin):
             self.organizer.pluginSetting(self.name(), "database_file")
         )
 
+        self.processed_logs = set()
+
         return True
 
-    def get_crash_logs(self) -> List[str]:
+    def get_crash_logs(self) -> Set[str]:
         directory = self.organizer.managedGame().documentsDirectory()
         directory.cd("SKSE")
         directory.setNameFilters(["crash-*.log"])
-        return [file.absoluteFilePath() for file in directory.entryInfoList()]
-
-    def onAboutToRunCallback(self, path : str) -> bool:
-        self.crash_logs = self.get_crash_logs()
-        return True
+        return set((file.absoluteFilePath() for file in directory.entryInfoList()))
 
     def onFinishedRunCallback(self, path : str, exit_code : int):
-        new_logs = set(self.get_crash_logs()).difference(set(self.crash_logs))
+        new_logs = self.get_crash_logs().difference(self.processed_logs)
         for log in new_logs:
             self.processor.update_database()
             self.processor.process_log(log)
+        self.processed_logs.update(new_logs)
 
     def onPluginSettingChangedCallback(
         self,
@@ -94,5 +92,7 @@ class CrashLogLabeler(IPlugin):
     def onUserInterfaceInitializedCallback(self, main_window : "QMainWindow"):
         self.processor.update_database()
 
-        for log in self.get_crash_logs():
+        logs = self.get_crash_logs()
+        for log in logs:
             self.processor.process_log(log)
+        self.processed_logs.update(logs)

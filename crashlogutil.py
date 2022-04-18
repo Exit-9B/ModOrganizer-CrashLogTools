@@ -14,7 +14,6 @@ class CrashLogProcessor():
         self.git_remote = git_remote
         self.git_branch = bytes(git_branch, "utf-8")
         self.database = database
-        self.needsUpdate = True
 
     def update_settings(self, git_remote : str, git_branch : str, database : str):
         self.git_remote = git_remote
