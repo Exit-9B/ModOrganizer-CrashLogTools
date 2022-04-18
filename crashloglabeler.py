@@ -73,13 +73,10 @@ class CrashLogLabeler(IPlugin):
         return True
 
     def onFinishedRunCallback(self, path : str, exit_code : int):
-        if exit_code == 0:
-            return
-
-        for log in self.get_crash_logs():
-            if log not in self.crash_logs:
-                self.processor.update_database()
-                self.processor.process_log(log)
+        new_logs = set(self.get_crash_logs()).difference(set(self.crash_logs))
+        for log in new_logs:
+            self.processor.update_database()
+            self.processor.process_log(log)
 
     def onPluginSettingChangedCallback(
         self,
