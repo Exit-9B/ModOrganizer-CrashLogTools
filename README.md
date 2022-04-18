@@ -15,7 +15,7 @@ it as well. If you wish to restore the original logs, they can be found in the
 Recycle Bin.
 
 #### Settings
-**offline_mode**
+**offline_mode**  
 Disables automatic updates from the remote database.
 
 ### Crash Log Viewer
