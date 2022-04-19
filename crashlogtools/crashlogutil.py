@@ -131,15 +131,19 @@ class CrashLog():
 
                 if line == "\n":
                     break
+                elif line == "REGISTERS:\n":
+                    self.post_call_stack.append("\n")
+                    break
 
                 self.call_stack.append(line)
 
             while True:
+                self.post_call_stack.append(line)
+
                 line = f.readline()
                 if not line:
                     return
 
-                self.post_call_stack.append(line)
 
 class IdScanner():
     def __init__(self, database : str):

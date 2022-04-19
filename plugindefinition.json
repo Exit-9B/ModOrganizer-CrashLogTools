@@ -7,13 +7,13 @@
     "NexusUrl": "https://www.nexusmods.com/skyrimspecialedition/mods/66743",
     "Versions": [
         {
-            "Version": "1.0.0.0",
+            "Version": "1.0.1.0",
             "Released": "2022-04-18",
             "MinSupport": "2.4.2",
             "MaxSupport": "2.4.4",
             "MinWorking": "2.3.0rc1",
             "MaxWorking": "",
-            "DownloadUrl": "https://github.com/Exit-9B/ModOrganizer-CrashLogTools/releases/download/v1.0.0/crashlogtools-v1.0.0.7z",
+            "DownloadUrl": "https://github.com/Exit-9B/ModOrganizer-CrashLogTools/releases/download/v1.0.1/crashlogtools-v1.0.1.7z",
             "PluginPath": [
                 "crashlogtools"
             ],
